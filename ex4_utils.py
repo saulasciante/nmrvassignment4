@@ -2,6 +2,11 @@ import math
 
 import numpy as np
 
+import sympy as sp
+from sympy.interactive.printing import init_printing
+
+init_printing(use_unicode=False, wrap_line=False)
+
 
 def kalman_step(A, C, Q, R, y, x, V):
     # INPUTS:
@@ -33,6 +38,7 @@ def kalman_step(A, C, Q, R, y, x, V):
 
     return xnew, Vnew, loglik, VVnew
 
+
 def gaussian_prob(x, m, C, use_log=False):
     # Evaluate multivariate Gaussian density
     # p(i) = N(X(:,i), m, C) where C = covariance matrix and each COLUMN of x is a datavector
@@ -59,6 +65,37 @@ def gaussian_prob(x, m, C, use_log=False):
 
     return p
 
+
 def sample_gauss(mu, sigma, n):
     # sample n samples from a given multivariate normal distribution
     return np.random.multivariate_normal(mu, sigma, n)
+
+
+def get_input_matrices(q, r):
+    F_matrix = [[1, 0, 1, 0],
+                [0, 1, 0, 1],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1]]
+
+    L_matrix = [[0, 0],
+                [0, 0],
+                [1, 0],
+                [0, 1]]
+
+    T, _ = sp.symbols('T q')
+    F = sp.Matrix(F_matrix)
+    Fi = (sp.exp(F * T)).subs(T, 1)
+
+    L = sp.Matrix(L_matrix)
+    Q = sp.integrate((Fi * L) * q * (Fi * L).T, (T, 0, T))
+    Q = Q.subs(T, 1)
+
+    Fi = np.array(Fi, dtype="float")
+    Q = np.array(Q, dtype="float")
+
+    H = np.array([[1, 0, 0, 0],
+                  [0, 1, 0, 0]], dtype="float")
+
+    R = r * np.array([[1, 0], [0, 1]], dtype="float")
+
+    return Fi, H, Q, R
