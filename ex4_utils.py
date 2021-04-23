@@ -71,31 +71,67 @@ def sample_gauss(mu, sigma, n):
     return np.random.multivariate_normal(mu, sigma, n)
 
 
-def get_input_matrices(q, r):
-    F_matrix = [[1, 0, 1, 0],
-                [0, 1, 0, 1],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]]
-
-    L_matrix = [[0, 0],
-                [0, 0],
-                [1, 0],
-                [0, 1]]
-
-    T, _ = sp.symbols('T q')
-    F = sp.Matrix(F_matrix)
+def compute_input_matrices(q, F, L):
+    T = sp.symbols('T')
+    F = sp.Matrix(F)
     Fi = (sp.exp(F * T)).subs(T, 1)
 
-    L = sp.Matrix(L_matrix)
+    L = sp.Matrix(L)
     Q = sp.integrate((Fi * L) * q * (Fi * L).T, (T, 0, T))
     Q = Q.subs(T, 1)
 
     Fi = np.array(Fi, dtype="float")
     Q = np.array(Q, dtype="float")
 
-    H = np.array([[1, 0, 0, 0],
-                  [0, 1, 0, 0]], dtype="float")
+    return Fi, Q
 
-    R = r * np.array([[1, 0], [0, 1]], dtype="float")
 
-    return Fi, H, Q, R
+def get_model_matrices(model, r):
+    if model == "RW":
+        F_matrix = [[1, 0],
+                    [0, 1]]
+
+        L_matrix = [[1], [0]]
+
+        H = np.array([[1, 0], [0, 1]], dtype="float")
+        R = r * np.array([[1, 0], [0, 1]], dtype="float")
+
+    elif model == "NCV":
+        F_matrix = [[1, 0, 1, 0],
+                    [0, 1, 0, 1],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]]
+
+        L_matrix = [[0, 0],
+                    [0, 0],
+                    [1, 0],
+                    [0, 1]]
+
+        H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], dtype="float")
+        R = r * np.array([[1, 0], [0, 1]], dtype="float")
+
+    elif model == "NCA":
+        F_matrix = [[1, 0, 1, 0, 1/2, 0],
+                    [0, 1, 0, 1, 0, 1/2],
+                    [0, 0, 1, 0, 1, 0],
+                    [0, 0, 0, 1, 0, 1],
+                    [0, 0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 1]]
+
+        L_matrix = [[0, 0],
+                    [0, 0],
+                    [0, 0],
+                    [0, 0],
+                    [1, 0],
+                    [0, 1]]
+
+        H = np.array([[1, 0, 0, 0, 0, 0],
+                      [0, 1, 0, 0, 0, 0]], dtype="float")
+                      # [0, 0, 0, 0, 1, 0],
+                      # [0, 0, 0, 0, 0, 1]], dtype="float")
+
+        R = r * np.array([[1, 0], [0, 1]], dtype="float")
+    else:
+        raise NotImplementedError
+
+    return F_matrix, L_matrix, H, R

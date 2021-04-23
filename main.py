@@ -1,8 +1,16 @@
-from ex4_utils import kalman_step, get_input_matrices
+from ex4_utils import kalman_step, compute_input_matrices, get_model_matrices
 import numpy as np
 import math
 
 import matplotlib.pyplot as plt
+
+q = 100
+r = 1
+model = "NCV"
+
+F, L, H, R = get_model_matrices(model, r)
+Fi, Q = compute_input_matrices(q, F, L)
+
 
 N = 40
 v = np.linspace(5 * math.pi, 0, N)
@@ -17,8 +25,6 @@ sy = np.zeros((y.size, 1), dtype=np.float32).flatten()
 
 sx[0] = x[0]
 sy[0] = y[0]
-
-Fi, H, Q, R = get_input_matrices(1, 1)
 
 state = np.zeros((Fi.shape[0], 1), dtype=np.float32).flatten()
 state[0] = x[0]
