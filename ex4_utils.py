@@ -7,7 +7,6 @@ from sympy.interactive.printing import init_printing
 
 init_printing(use_unicode=False, wrap_line=False)
 
-
 def kalman_step(A, C, Q, R, y, x, V):
     # INPUTS:
     # A - the system matrix
