@@ -7,6 +7,7 @@ from sympy.interactive.printing import init_printing
 
 init_printing(use_unicode=False, wrap_line=False)
 
+
 def kalman_step(A, C, Q, R, y, x, V):
     # INPUTS:
     # A - the system matrix
@@ -87,19 +88,20 @@ def compute_input_matrices(q, F, L):
 
 def get_model_matrices(model, r):
     if model == "RW":
-        F_matrix = [[1, 0],
-                    [0, 1]]
+        F_matrix = [[0, 0],
+                    [0, 0]]
 
-        L_matrix = [[1], [0]]
+        L_matrix = [[1, 0],
+                    [0, 1]]
 
         H = np.array([[1, 0], [0, 1]], dtype="float")
         R = r * np.array([[1, 0], [0, 1]], dtype="float")
 
     elif model == "NCV":
-        F_matrix = [[1, 0, 1, 0],
-                    [0, 1, 0, 1],
-                    [0, 0, 1, 0],
-                    [0, 0, 0, 1]]
+        F_matrix = [[0, 0, 1, 0],
+                    [0, 0, 0, 1],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0]]
 
         L_matrix = [[0, 0],
                     [0, 0],
@@ -110,12 +112,12 @@ def get_model_matrices(model, r):
         R = r * np.array([[1, 0], [0, 1]], dtype="float")
 
     elif model == "NCA":
-        F_matrix = [[1, 0, 1, 0, 1/2, 0],
-                    [0, 1, 0, 1, 0, 1/2],
-                    [0, 0, 1, 0, 1, 0],
-                    [0, 0, 0, 1, 0, 1],
+        F_matrix = [[0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0],
                     [0, 0, 0, 0, 1, 0],
-                    [0, 0, 0, 0, 0, 1]]
+                    [0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0]]
 
         L_matrix = [[0, 0],
                     [0, 0],
@@ -126,8 +128,6 @@ def get_model_matrices(model, r):
 
         H = np.array([[1, 0, 0, 0, 0, 0],
                       [0, 1, 0, 0, 0, 0]], dtype="float")
-                      # [0, 0, 0, 0, 1, 0],
-                      # [0, 0, 0, 0, 0, 1]], dtype="float")
 
         R = r * np.array([[1, 0], [0, 1]], dtype="float")
     else:
